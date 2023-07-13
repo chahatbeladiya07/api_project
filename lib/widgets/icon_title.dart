@@ -1,16 +1,14 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-
-import '../ColorConsts.dart';
+import '../color_consts.dart';
 import '../helpers/TextStyles.dart';
 
+// ignore: must_be_immutable
 class IconsTitle extends StatelessWidget {
-  String? svgPath,Icon;
+  String? svgPath,iconPath;
   final String title;
   final double height,width;
-  IconsTitle({super.key,this.svgPath,this.Icon, required this.title, this.height=22,  this.width=22,});
+  IconsTitle({super.key,this.svgPath,this.iconPath, required this.title, this.height=22,  this.width=22,});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +20,8 @@ class IconsTitle extends StatelessWidget {
           svgPath!,
           height: height,
           width: width,
-          colorFilter: ColorFilter.mode(appPrimary, BlendMode.srcIn),
-        ) : Icon !=null ?Image.asset(Icon!,height: height,width: height,color:appPrimary,) : const SizedBox.shrink(),
+          colorFilter: const ColorFilter.mode(appPrimary, BlendMode.srcIn),
+        ) : iconPath !=null ?Image.asset(iconPath!,height: height,width: height,color:appPrimary,) : const SizedBox.shrink(),
         const SizedBox(width: 8,),
         Flexible(
           child: Text(

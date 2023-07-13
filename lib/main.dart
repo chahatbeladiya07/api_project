@@ -1,10 +1,10 @@
-import 'package:api_project/Screens/createUser/createUserScreen.dart';
+import 'package:api_project/Screens/createUser/create_user_screen.dart';
 import 'package:api_project/Screens/homeScreen/homeScreen.dart';
-import 'package:api_project/api/apiCall.dart';
+import 'package:api_project/api/api_call.dart';
 import 'package:api_project/helpers/TextStyles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'ColorConsts.dart';
+import 'color_consts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) {
-          return apiProvideClass();
+          return ApiProvideClass();
         },),
       ],
       child: MaterialApp(
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: appPrimary),
-          primarySwatch: MaterialColor(primary, swatch),
+          primarySwatch: const MaterialColor(primary, swatch),
           fontFamily: "Inter",
           appBarTheme: AppBarTheme(
             backgroundColor: appPrimary.withOpacity(0.8),
@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: HomeScreen.pageName,
         routes: {
-          HomeScreen.pageName : (context) =>  HomeScreen(),
-          CreateUserScreen.pageName: (context) => CreateUserScreen()
+          HomeScreen.pageName : (context) =>  const HomeScreen(),
+          CreateUserScreen.pageName: (context) => const CreateUserScreen()
         },
       ),
     );

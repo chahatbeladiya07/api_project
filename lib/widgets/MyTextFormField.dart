@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../ColorConsts.dart';
+import '../color_consts.dart';
 import '../helpers/TextStyles.dart';
 
 
@@ -15,7 +15,7 @@ class MyTextFormField extends StatelessWidget {
   final String? hintText;
   final FocusNode? focusNode;
   final void Function(String)? onFieldSubmitted;
-   MyTextFormField({
+   const MyTextFormField({
     Key? key,
     this.label,
     this.inputFormatters,
@@ -43,7 +43,7 @@ class MyTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.only(bottom: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,9 +1,6 @@
-import 'package:api_project/ColorConsts.dart';
-import 'package:api_project/Models/ApiModels.dart';
-import 'package:api_project/Screens/homeScreen/homeScreen.dart';
-import 'package:api_project/api/apiCall.dart';
+import 'package:api_project/color_consts.dart';
+import 'package:api_project/api/api_call.dart';
 import 'package:api_project/helpers/imageValidator.dart';
-import 'package:api_project/widgets/BackButton.dart';
 import 'package:api_project/widgets/MyTextFormField.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +16,7 @@ class CreateUserScreen extends StatefulWidget {
   final int? age;
   final String? address;
   final int? id;
-  CreateUserScreen({
+  const CreateUserScreen({
     super.key,
     this.name,
     this.number,
@@ -61,9 +58,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     addressController=TextEditingController(text: widget.address);
     // TODO: implement initState
     super.initState();
-    setState(() {
-
-    });
   }
 
   @override
@@ -86,17 +80,17 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<apiProvideClass>();
+    final provider = context.watch<ApiProvideClass>();
     return Form(
       key: _formKey,
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Add New User"),
-          leading: const Back_Button(),
+          title: const Text("Add New User"),
+          leading: const BackButton(),
           automaticallyImplyLeading: false,
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -180,13 +174,14 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                   ],
                   validator: (validate) {
                     if (ageController.text != "") {
-                      int Age = int.parse(ageController.text.toString());
-                      if (validate!.length > 3 || Age > 150 || Age <= 0) {
+                      int age = int.parse(ageController.text.toString());
+                      if (validate!.length > 3 || age > 150 || age <= 0) {
                         return "please enter valid Age";
                       }
                     } else {
                       return null;
                     }
+                    return null;
                   },
                 ),
                 const SizedBox(
@@ -220,28 +215,37 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           backgroundColor: appPrimary,
           onPressed: onPressed,
           label:widget.name==null? provider.isLoadingForSave == true
-              ? Padding(
-                  padding: const EdgeInsets.all(8),
+              ? const Padding(
+                  padding: EdgeInsets.all(8),
                   child: CircularProgressIndicator(
                     color: Colors.white,
                   ),
                 )
-              : Text(
+              : const Text(
                   "Save",
                   style: TextStyle(color: Colors.white),
-                ) : Text("Update",style: TextStyle(color: Colors.white),),
+                ) :provider.isLoadingForPut? const Padding(
+            padding: EdgeInsets.all(8),
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ) : const Text("Update",style: TextStyle(color: Colors.white),),
         ),
       ),
     );
   }
 
   void onPressed() async {
+    if(widget.name!=null){
+      context.read<ApiProvideClass>().isLoadingForPut;
+    } else {
+      context.read<ApiProvideClass>().isLoadingForSave;
+    }
     //nothing
     bool isvalid = true;
     if (imageController.text.trim().isNotEmpty) {
       final image = await imageValidate(url: imageController.text.trim());
       isvalid = image;
-      print("final result : $image");
       if (isvalid == false) {
         Fluttertoast.showToast(msg: "Invalid URL");
       }
@@ -249,7 +253,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     if (_formKey.currentState!.validate() &&
         isvalid == true &&
         _formKey.currentState != null) {
-      print("validate");
       final Map<String, dynamic> userdata = {
         'name': nameController.text.trim().toString(),
         'mobile_number': numberController.text.toString(),
@@ -261,15 +264,27 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         if (ageController.text.trim() != "")
           'age': int.parse(ageController.text.trim()),
       };
-      if(widget.name==null){
-        final result =
-            await context.read<apiProvideClass>().postApi(userData: userdata);
-        print("post result = $result");
+      if(widget.name!=null){
+        // ignore: use_build_context_synchronously
+        await context.read<ApiProvideClass>().putApi(id: widget.id!, user: userdata).then((value) async {
+          if(value.success==true){
+            await context.read<ApiProvideClass>().apiCall();
+            // ignore: use_build_context_synchronously
+            Navigator.pop(context);
+          }
+        });
+
       } else {
-       await context.read<apiProvideClass>().putApi(id: widget.id!, user: userdata);
+        // ignore: use_build_context_synchronously
+        await context.read<ApiProvideClass>().postApi(userData: userdata).then((value) async {
+          if(value.success==true){
+            await context.read<ApiProvideClass>().apiCall();
+            // ignore: use_build_context_synchronously
+            Navigator.pop(context);
+          }
+        });
       }
-      await context.read<apiProvideClass>().apiCall();
-      Navigator.pop(context);
+
     }
   }
 }

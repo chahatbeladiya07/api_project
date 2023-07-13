@@ -1,14 +1,18 @@
-import 'package:api_project/ColorConsts.dart';
-import 'package:api_project/Models/ApiModels.dart';
-import 'package:api_project/api/apiCall.dart';
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:api_project/color_consts.dart';
+import 'package:api_project/api/api_call.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/IconTitle.dart';
+import '../../widgets/icon_title.dart';
 import '../../widgets/customButton.dart';
-import '../createUser/createUserScreen.dart';
+import '../createUser/create_user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const pageName="/home";
+
+  const HomeScreen({super.key});
   @override
   State<HomeScreen> createState()=>_HomeScreenState();
 }
@@ -27,10 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   List<int> selectedId = [];
   int length=0;
+  bool islongpress=false;
   @override
   void initState() {
    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-     context.read<apiProvideClass>().apiCall();
+     context.read<ApiProvideClass>().apiCall();
      //     .then((value) {
      //   if(value.success && value.data!=null){
      //     services=value.data;
@@ -44,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    final provider=context.watch<apiProvideClass>();
-    final users=context.watch<apiProvideClass>().users;
+    final provider=context.watch<ApiProvideClass>();
+    final users=context.watch<ApiProvideClass>().users;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -53,29 +58,43 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
-          IconButton(
-              onPressed: () async {
-            for(int i=0; i<selectedId.length; i++) {
-             final isdeleted = await context.read<apiProvideClass>().apiDelete(id: selectedId.elementAt(i));
-             if(isdeleted==true){
-               users.removeWhere((element) => element.id==selectedId[i]);
-             }
-            }
-            // context.read<apiProvideClass>().apiCall();
-            context.read<apiProvideClass>().tempList=List.filled(users.length, false);
-            selectedId.clear();
-          },
-          icon: const Icon(Icons.delete))
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child:provider.isLoadingForDelete==true?
+                  const SizedBox(
+              height: 25,
+                width: 25.0,
+                child: CircularProgressIndicator(color: Colors.white,))
+                : InkWell(
+              onTap: () async {
+                if(selectedId.isNotEmpty){
+                  for(int i=0; i<selectedId.length; i++) {
+                    final isdeleted = await context.read<ApiProvideClass>().apiDelete(id: selectedId.elementAt(i));
+                    if(isdeleted.success==true){
+                      users.removeWhere((element) => element.id==selectedId[i]);
+                    }
+                  }
+                  // context.read<apiProvideClass>().apiCall();
+                  context.read<ApiProvideClass>().tempList=List.filled(users.length, false);
+                  selectedId.clear();
+                  islongpress=false;
+                } else {
+                  Fluttertoast.showToast(msg: "Please select items to delete");
+                }
+              },
+                child: Icon(Icons.delete,color: selectedId.isNotEmpty?Colors.white: Colors.black26,))
+          ),
+
+
         ],
       ),
       body: provider.isloading==true ?
-      const Center(child: CircularProgressIndicator()): users!=null ?
-      buildUi() : Text("Error"),
+      const Center(child: CircularProgressIndicator()): buildUi() ,
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
            Navigator.pushNamed(context, CreateUserScreen.pageName);
-           // //  Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen2(),));
-           //  setState(() {});
+           //  Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen2(),));
+           // setState(() {});
           },
           elevation: 0,
           backgroundColor: appPrimary.withOpacity(0.7),
@@ -84,8 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   Padding buildUi() {
-    final users= context.watch<apiProvideClass>().users;
-    final tempList=context.watch<apiProvideClass>().tempList;
+    final users= context.watch<ApiProvideClass>().users;
+    final tempList=context.watch<ApiProvideClass>().tempList;
     return Padding(
       padding: const EdgeInsets.all(15),
       child: ListView.builder(
@@ -95,34 +114,54 @@ class _HomeScreenState extends State<HomeScreen> {
           return Stack(
             children: [
               InkWell(
+                splashColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onLongPress: () {
+                  islongpress=true;
+                  if(islongpress=true){
+                    if(tempList[index]==false){
+                      tempList[index]=true;
+                    } else {
+                      tempList[index]=false;
+                    }
+                    if(selectedId.contains(user.id)){
+                      selectedId.removeAt(selectedId.indexOf(user.id));
+                    } else {
+                      selectedId.add(user.id);
+                    }
+                    // print("selected Index : $index => ${selectedId.elementAt(index)}");
+                    if(selectedId.isEmpty){
+                      islongpress=false;
+                    }
+                  }
+                  setState(() {});
+                },
                 onTap: (){
-                  if(tempList[index]==false){
-                    tempList[index]=true;
-                  } else {
-                    tempList[index]=false;
+                  if(islongpress==true){
+                    if(tempList[index]==false){
+                      tempList[index]=true;
+                    } else {
+                      tempList[index]=false;
+                    }
+                    if(selectedId.contains(user.id)){
+                      selectedId.removeAt(selectedId.indexOf(user.id));
+                    } else {
+                      selectedId.add(user.id);
+                    }
+                    // print("selected Index : $index => ${selectedId.elementAt(index)}");
+                    if(selectedId.isEmpty){
+                      islongpress=false;
+                    }
                   }
-                  setState(() {
-
-                  });
-                  if(selectedId.contains(user.id)){
-                    selectedId.removeAt(selectedId.indexOf(user.id));
-                    print("removed : ${user.id}");
-                  } else {
-                    selectedId.add(user.id);
-                  }
-                  // print("selected Index : $index => ${selectedId.elementAt(index)}");
-                  print("Selected List : $selectedId");
-                  print("temp List : $tempList");
-                  setState(() {
-
-                  });
+                  setState(() {});
                 },
                 child: Container(
                     margin: const EdgeInsets.only(bottom: 15),
                     decoration: BoxDecoration(
                       color: background,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: tempList[index]==true? Colors.red: appPrimary),
+                      border: Border.all(color: tempList[index]==true? Colors.red: appPrimary,width: selectedId.isNotEmpty? 1.5: 1),
                     ),
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
@@ -145,24 +184,48 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              IconsTitle(svgPath: 'assets/icons/person.svg',title: "${user.name}"),
+                              IconsTitle(svgPath: 'assets/icons/person.svg',title: user.name),
                               const SizedBox(height: 5,),
-                              IconsTitle(Icon: 'assets/images/callPng.png',title: "${user.mobile_number}"),
+                              IconsTitle(iconPath: 'assets/images/callPng.png',title: user.mobileNumber),
                               const SizedBox(height: 5,),
-                              IconsTitle(svgPath: 'assets/icons/email.svg',title: "${user.email}"),
+                              IconsTitle(svgPath: 'assets/icons/email.svg',title: user.email),
                               const SizedBox(height: 5,),
-                              IconsTitle(Icon: 'assets/images/age.png',title: "${user.age==null? "" : user.age}",height: 21,width: 21,),
+                              IconsTitle(iconPath: 'assets/images/age.png',title: "${user.age ?? ""}",height: 21,width: 21,),
                               const SizedBox(height: 5,),
-                              IconsTitle(svgPath: 'assets/icons/location.svg',title: "${user.address==null?"" : user.address}"),
+                              IconsTitle(svgPath: 'assets/icons/location.svg',title: user.address ?? ""),
                             ],
                           ),
                         ),
                       ],
-                    )),
+                    )
+                ),
               ),
               Positioned(
                 right: 0,
-                child: PopupMenuButton(
+                child:selectedId.isNotEmpty?
+                IconButton(
+                    onPressed: (){
+                      if(tempList[index]==false){
+                        tempList[index]=true;
+                      } else {
+                        tempList[index]=false;
+                      }
+                      if(selectedId.contains(user.id)){
+                        selectedId.removeAt(selectedId.indexOf(user.id));
+                      } else {
+                        selectedId.add(user.id);
+                      }
+                      // print("selected Index : $index => ${selectedId.elementAt(index)}");
+                      if(selectedId.isEmpty){
+                        islongpress=false;
+                      }
+                      setState(() {});
+                    },
+                      icon: Icon(tempList[index]==true?
+                        Icons.check_circle_rounded:
+                        Icons.circle_outlined
+                    ),
+                ): PopupMenuButton(
                   onSelected: (value) async {
                     int click =value ;
                     int id= user.id;
@@ -173,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context) => CreateUserScreen(
                               name: user.name,
                               email: user.email,
-                              number: user.mobile_number,
+                              number: user.mobileNumber,
                               age: user.age,
                               address: user.address,
                               image: user.image,
@@ -182,10 +245,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                       );
                     } else if(click==1){
-                        bool isDeleted =await context.read<apiProvideClass>().apiDelete(id: id);
-                        if(isDeleted == true){
+                        var isDeleted =await context.read<ApiProvideClass>().apiDelete(id: id);
+                        if(isDeleted.success == true){
                           users.removeAt(index);
-                          print("ServiceList - Length : ${users.length}");
                         }
                       }
                   },
@@ -200,22 +262,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       final int click=buttonList.indexOf(e);
                       return PopupMenuItem(
                         value: click,
-                        // onTap: () async {
-                        //   int id= user.id;
-                        //   if(click==1){
-                        //     bool isDeleted =await context.read<apiProvideClass>().apiDelete(id: id);
-                        //     if(isDeleted == true){
-                        //       users.removeAt(index);
-                        //       print("ServiceList - Length : ${users.length}");
-                        //     }
-                        //   }
-                        //   else if(click==0){
-                        //     Navigator.pop(context);
-                        //     await Future.delayed(Duration(milliseconds: 500));
-                        //     Navigator.push(context, MaterialPageRoute(builder: (context) => CreateUserScreen(data: user),));
-                        //     print(click);
-                        //   }
-                        // },
                         child: CustomButton(
                           title: e["title"]!,
                           svgPath: e["svgPath"]!,
