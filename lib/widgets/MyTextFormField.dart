@@ -15,7 +15,8 @@ class MyTextFormField extends StatelessWidget {
   final String? hintText;
   final FocusNode? focusNode;
   final void Function(String)? onFieldSubmitted;
-   const MyTextFormField({
+  void Function(String)? onChanged;
+  MyTextFormField({
     Key? key,
     this.label,
     this.inputFormatters,
@@ -27,7 +28,7 @@ class MyTextFormField extends StatelessWidget {
     this.hintText,
     this.focusNode,
     this.onFieldSubmitted,
-
+     this.onChanged
   }) : super(key: key);
 
   OutlineInputBorder border({Color color = appPrimary, double width = 1.0}) {
@@ -56,6 +57,7 @@ class MyTextFormField extends StatelessWidget {
               ),
             ),
           TextFormField(
+            onChanged: onChanged,
             onFieldSubmitted: onFieldSubmitted,
             focusNode: focusNode,
             controller: controller,
