@@ -86,8 +86,12 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Add New User"),
-          leading: const BackButton(),
-          automaticallyImplyLeading: false,
+          leading:  IconButton(
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back_ios_rounded,color: Colors.white,)),
+
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
