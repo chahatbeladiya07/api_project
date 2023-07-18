@@ -71,6 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(15),
       child: RefreshIndicator(
         onRefresh: () async {
+          searchController.clear();
+          searchList.clear();
+          selectedId.clear();
+          setState(() {});
           await context.read<ApiProvideClass>().apiCall();
         },
         child: Column(
@@ -91,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   }
                 } else {
+                  FocusManager.instance.primaryFocus!.unfocus();
                 }
                 setState(() {});
               },
